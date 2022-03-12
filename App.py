@@ -30,30 +30,30 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
-alphabet = {num:i for num,i in zip(range(1,27),ascii_uppercase)}
+# alphabet = {num:i for num,i in zip(range(1,27),ascii_uppercase)}
 
-fig = make_subplots(rows=5, cols=5)
+# fig = make_subplots(rows=6, cols=5)
 
-for row_i in range(1,6):
-    for col_i in range(1,6):
-        fig.add_trace(
-            go.Scatter(
-                x=[1], y=[1],
-                text=str([row_i,col_i]),
-                mode="text",
-            ),
-            row=row_i, col=col_i
-        )
+# for row_i in range(1,6):
+    # for col_i in range(1,7):
+        # fig.add_trace(
+            # go.Scatter(
+                # x=[1], y=[1],
+                # text=str([row_i,col_i]),
+                # mode="text",
+            # ),
+            # row=row_i, col=col_i
+        # )
 
 
-fig.update_traces(
-    textposition='middle center',
-    textfont_size=20,
-    showlegend=False,
+# fig.update_traces(
+    # textposition='middle center',
+    # textfont_size=20,
+    # showlegend=False,
     
-)
-fig.update_xaxes(showgrid=False,showticklabels=False)
-fig.update_yaxes(showgrid=False,showticklabels=False)
+# )
+# fig.update_xaxes(showgrid=False,showticklabels=False)
+# fig.update_yaxes(showgrid=False,showticklabels=False)
 
 
 #Subplot creating function
@@ -64,11 +64,13 @@ def create_subplot(row, col, fig, color="gray",text="hi"):
             text=str(text),
             mode="text + markers",
             textfont = dict(color="Black",
-                           size=20),
+                           size=30),
             marker = dict(color=color,
                           size = 50,
+                          opacity=0.6
                           ),
-            marker_symbol="star"
+            marker_symbol="star",
+            # marker_line_width=1
 
         ),
         row=row, col=col
@@ -76,13 +78,15 @@ def create_subplot(row, col, fig, color="gray",text="hi"):
     
 #Base subplot to make changes to
     #~ Color is defined by the marker 
-fig = make_subplots(rows=6, cols=5)
+fig = make_subplots(rows=6,
+                    cols=5,
+                    horizontal_spacing=0.01,
+                    vertical_spacing=0.03,
+        )
 
-fig = make_subplots(rows=6, cols=5)
-
-for row_i in range(1,6):
+for row_i in range(1,7):
     for col_i in range(1,6):
-        create_subplot(row_i, col_i, fig, text = "")
+        create_subplot(row_i, col_i, fig, text = " ")
         
 fig.update_traces(
     textposition='middle center',
@@ -91,7 +95,17 @@ fig.update_traces(
 
 fig.update_xaxes(showgrid=False,showticklabels=False)
 fig.update_yaxes(showgrid=False,showticklabels=False)
-
+fig.update_layout(
+    height=500,
+    width=1000,
+    margin=dict(
+    l=200,
+    r=0,
+    b=10,
+    t=10,
+#                         pad=2
+    )
+)
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~App layout~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
@@ -117,9 +131,9 @@ app.layout = html.Div(
             dbc.Col(
                 dcc.Graph(
                     id = "plots",
-                    figure= fig
+                    figure= fig,
                 ),
-                width={"size": "10","offset":"1"},
+                width={"size": "4","offset":"2"},
                 align="center",
                 
             )
@@ -135,7 +149,7 @@ app.layout = html.Div(
                     # size="lg",
                     class_name="mb-3",
                     value=[],
-                    pattern=r"[a-z]"
+                    # pattern=r"[a-z]"
                 ),
                 width={"size": "4","offset":4},
                 align="center",
@@ -167,23 +181,26 @@ answer = list("lemon")
 
 def update_plots(word):
     #Somewhere here it should recieve the plot to update rather than using the global plot 
-
+        #~ Temporaraly explicitly defining the plot as global to prevent an odd lag in inputs otherwise
+        #~ Nevermind that isn't what was causing it. Just make sure the word.append isn't empty
+    # global fig
+    # fig = fig
+    
     #Set the word to 5 letters 
     word = list(word)
     while len(word) <5:
-        word.append("")
+        word.append(" ")
     
     for guess_letter, ans_letter, num in zip(word,answer,range(0,5)):
         fig.data[num].text = guess_letter
-        # if guess_letter is ans_letter:
-            # fig.data[num].marker.update(color="green")
-        # elif guess_letter in answer:
-            # fig.data[num].marker.update(color="yellow")
-        # else:
-            # fig.data[num].marker.update(color="grey")    
+        if guess_letter is ans_letter:
+            fig.data[num].marker.update(color="green",symbol = "star")
+        elif guess_letter in answer:
+            fig.data[num].marker.update(color="orange",symbol = "diamond")
+        else:
+            fig.data[num].marker.update(color="grey",symbol="x")    
     # print(word)
-    print(zip(word,answer,range(0,5)))
-    return fig
+    return fig, word
 
 
 
