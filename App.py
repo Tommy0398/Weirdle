@@ -142,6 +142,7 @@ app.layout = dbc.Container(
                         color="primary",
                         class_name= "mb-3",
                         size = "lg",
+                        n_clicks = 0,
                     ),
                     width={"size": "2"},
                     align= "center",
@@ -173,6 +174,34 @@ app.layout = dbc.Container(
     fluid=True
 )
 
+def update_plot_guess(word,answer,plot,range=range(0,5)):
+    for guess_letter, ans_letter, num in zip(word,answer,range):
+        #Add letter to graphs
+        plot["data"][num]["text"] = guess_letter
+        
+        #Correct letter and postion
+        if guess_letter == ans_letter:
+            plot["data"][num]["marker"].update(color="green",symbol = "star")
+            
+        #Correct letter wrong position
+        elif guess_letter in answer:
+            plot["data"][num]["marker"].update(color="orange",symbol = "diamond")
+            
+        #Wrong letter and position
+        else:
+            plot["data"][num]["marker"].update(color="grey",symbol="x")
+    
+    return plot
+
+def update_plot_input(word,answer,plot,range=range(0,5)):
+    for guess_letter, ans_letter, num in zip(word,answer,range):
+        #Add letter to graphs
+        plot["data"][num]["text"] = guess_letter
+            
+    return plot
+
+
+
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Callbacks ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
@@ -183,15 +212,19 @@ answer = list("LEMON")
     Output("plots", "figure"),
     Output("text_output", "children"),
     Input("input_box", "value"),
-    State("plots", "figure"),
+    State("enter_button", "n_clicks"),
+    State("plot_store", "data"),
 )
 
-def update_plots(word,figure):
+def update_plots(word,n_clicks,figure):
     #Somewhere here it should recieve the plot to update rather than using the global plot 
         #~ Temporaraly explicitly defining the plot as global to prevent an odd lag in inputs otherwise
         #~ Nevermind that isn't what was causing it. Just make sure the word.append isn't empty
     # global fig
     # fig = fig
+        
+    if figure == None:
+        figure = fig
         
     #Set the word to 5 letters 
     word = list(word)
@@ -202,36 +235,98 @@ def update_plots(word,figure):
     #Add the letters to the plot and indicate whether the letters are correct
         #~ The correctness check needs to go into a different callback that utilises and input button(or other)
         #~ Also needs a bit more logic to account for letters occuring multiple times
-    for guess_letter, ans_letter, num in zip(word,answer,range(0,5)):
-        #Add letter to graphs
-        figure["data"][num]["text"] = guess_letter
-        #Correct letter and postion
-        if guess_letter == ans_letter:
-            figure["data"][num]["marker"].update(color="green",symbol = "star")
-        #Correct letter wrong position
-        elif guess_letter in answer:
-            figure["data"][num]["marker"].update(color="orange",symbol = "diamond")
-        #Wrong letter and position
-        else:
-            figure["data"][num]["marker"].update(color="grey",symbol="x")
+        
+    #Update the plot depending on the current input and guess count
+    
+    if n_clicks == 0:
+        update_plot_input(word,answer,figure,range(0,5))
+        
+    if n_clicks == 1:
+        update_plot_input(word,answer,figure,range(5,10))   
+
+    if n_clicks == 2:
+        update_plot_input(word,answer,figure,range(10,15))
+
+    if n_clicks == 3:
+        update_plot_input(word,answer,figure,range(15,20))
+        
+    if n_clicks == 4:
+        update_plot_input(word,answer,figure,range(20,25))
+        
+
+        # if guess_letter == ans_letter:
+            # figure["data"][num]["marker"].update(color="green",symbol = "star")
+        # #Correct letter wrong position
+        # elif guess_letter in answer:
+            # figure["data"][num]["marker"].update(color="orange",symbol = "diamond")
+        # #Wrong letter and position
+        # else:
+            # figure["data"][num]["marker"].update(color="grey",symbol="x")
+            
+    # print(dash.callback_context.triggered)     
+            
+            
     return figure, word
 
 
-# @app.callback(
-    # Output("plot_store", "data"),
-    # Input("enter_button", "n_clicks"),
-    # State("input_box", "value"),
-    # State("plots", "figure"),
+@app.callback(
+    Output("plot_store", "data"),
+    Input("enter_button", "n_clicks"),
+    State("input_box", "value"),
+    State("plots", "figure"),
 
-# )
+)
 
-# def update_store(n_clicks,word,figure):
+def update_store(n_clicks,word,figure):
 
+
+    if figure == None:
+        figure = fig
+
+    #Set the word to 5 letters 
+    word = list(word)
+    while len(word) <5:
+        word.append(" ")
+    word = [x.upper() for x in word]
     
-    # return(figure)
+    
+    #Update the plot depending on the current guess
+    
+    if n_clicks == 1:
+        update_plot_guess(word,answer,figure,range(0,5))
+        
+    if n_clicks == 2:
+        update_plot_guess(word,answer,figure,range(5,10))   
+
+    if n_clicks == 3:
+        update_plot_guess(word,answer,figure,range(10,15))
+
+    if n_clicks == 4:
+        update_plot_guess(word,answer,figure,range(15,20))
+        
+    if n_clicks == 5:
+        update_plot_guess(word,answer,figure,range(20,25))
+        
+        
+    return figure
 
 
-
+# # # # # def func(word,answer,plot,range=range(0,5)):
+    # # # # # for guess_letter, ans_letter, num in zip(word,answer,range):
+        # # # # # #Add letter to graphs
+        # # # # # # figure["data"][num]["text"] = guess_letter
+        # # # # # #Correct letter and postion
+        
+        # # # # # if guess_letter == ans_letter:
+            # # # # # plot["data"][num]["marker"].update(color="green",symbol = "star")
+        # # # # # #Correct letter wrong position
+        # # # # # elif guess_letter in answer:
+            # # # # # plot["data"][num]["marker"].update(color="orange",symbol = "diamond")
+        # # # # # #Wrong letter and position
+        # # # # # else:
+            # # # # # plot["data"][num]["marker"].update(color="grey",symbol="x")
+    
+    # # # # # return plot
 
 
 
