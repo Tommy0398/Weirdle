@@ -1,0 +1,19 @@
+#Graph
+	plots
+	~Row 2
+	
+#Input box 
+	input_box
+	~Row 3
+	
+#Enter button
+	enter_button
+	~Row 3
+	
+#Text output
+	text_output
+	~Row 4
+	
+#Plot browser store
+	plot_store
+	~Row 4
